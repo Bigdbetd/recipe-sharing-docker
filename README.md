@@ -1,59 +1,60 @@
-# Assignment #5 - Dockerize a Recipe Sharing Application
+# Assignment 5 - Recipe Sharing with Docker
 
-A full-stack recipe sharing application with React frontend and Node.js backend.
+React/Vite frontend, Express API, and a persistent SQLite database. Created from RizeComputerScience/COMPSVIII-Assignment5.
 
-## Your Assignment
-Your task is to containerize this application using Docker and Docker Compose. You'll need to create:
-1. `frontend/Dockerfile` - To containerize the React app
-2. `backend/Dockerfile` - To containerize the Node.js API
-3. `docker-compose.yml` - To orchestrate both services
+## Run the complete application
 
-Once completed, users should be able to run the entire application with a single command: `docker-compose up`.
+Install and start Docker Desktop, then run from the repository root:
 
-Good luck! 🚀
-
-## Local Development Setup
-
-### Prerequisites
-- Node.js 16 or higher
-- npm
-
-### Running the Application Locally
-
-1. **Start the Backend:**
 ```bash
-cd backend
-npm install
-npm start
+docker compose up --build
 ```
-Backend will run on `http://localhost:8080`. You can preview all recipes at `http://localhost:8080/api/recipes`.
 
-2. **Start the Frontend (in a new terminal)**:
+The legacy command `docker-compose up --build` also works when Docker Compose v1 is installed.
+
+- Frontend: http://localhost:3000
+- Recipes API: http://localhost:5000/api/recipes
+- Health check: http://localhost:5000/api/health
+
+The backend runs on port 5000. References to port 8080 in the starter instructions do not match the server configuration.
+
+## Container configuration
+
+- `backend/Dockerfile`: Node 18 Alpine, npm install, port 5000, and npm start.
+- `frontend/Dockerfile`: Node 18 Alpine builds the production assets; nginx serves them on port 80.
+- `docker-compose.yml`: builds both services, publishes ports 5000 and 3000, and starts the backend first.
+- `.dockerignore` files exclude host node_modules and local build/data files.
+
+Vite embeds `VITE_API_URL` at build time, so Compose supplies it as a build argument as well as the requested runtime environment variable. Rebuild the frontend after changing this value. The localhost address is for a browser on the computer running Docker.
+
+SQLite uses `DB_PATH=/app/data/recipes.db` inside the backend container. The named `recipe_data` volume persists this directory. Local development without DB_PATH continues using backend/recipes.db.
+
+## Verify the application and persistence
+
+1. Start the stack and wait for both services to finish starting.
+2. Open the frontend and confirm sample recipes appear.
+3. Add a recipe and confirm it appears in the frontend and recipes API.
+4. Run `docker compose down`, then `docker compose up -d`.
+5. Confirm the added recipe is still present.
+
+`docker compose down` preserves the database volume. Adding `-v` deletes that volume and its recipes.
+
+## Test individual containers
+
 ```bash
-cd frontend
-npm install
-npm run dev
+docker build -t recipe-backend ./backend
+docker run --rm -p 5000:5000 recipe-backend
 ```
-Frontend will run on `http://localhost:3000` (or the next available port).
 
-3. **Test the Application**:
-    - Visit the URL shown in your terminal (Usually `http://localhost:3000`)
-    - You should see sample recipes loaded
-    - Try adding a new recipe using the form
-    - Refresh the page to verify data persistence
-    - You can also see that it has been added in the backed by visiting or refreshing `http://localhost:8080/api/recipes`
+In another terminal:
 
-## API Endpoints
-- `GET /api/recipes` - Get all recipes
-- `GET /api/recipes/:id` - Get single recipe
-- `POST /api/recipes` - Create new recipe
-- `DELETE /api/recipes/:id` - Delete recipe
-- `GET /api/health` - Health check
-
-## Project Structure
 ```bash
-recipe-app/
-├── frontend/       # React application (Vite)
-├── backend/        # Node.js/Express API
-└── README.md       # This file
+docker build -t recipe-frontend ./frontend
+docker run --rm -p 3000:80 recipe-frontend
 ```
+
+Stop the individual containers before starting Compose so the ports are available.
+
+## Validation status
+
+Compose YAML and the modified database JavaScript passed syntax checks. Docker was unavailable in the editing environment, so image builds and runtime/persistence tests still need to be run on a Docker-enabled machine.
