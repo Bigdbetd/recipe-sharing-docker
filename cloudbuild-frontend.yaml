@@ -1,0 +1,28 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - build
+      - --build-arg
+      - VITE_API_URL=https://recipe-backend-1053892050255.us-central1.run.app
+      - -t
+      - us-central1-docker.pkg.dev/$PROJECT_ID/recipe-images/recipe-frontend:$BUILD_ID
+      - ./frontend
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/recipe-images/recipe-frontend:$BUILD_ID']
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - recipe-frontend
+      - --image=us-central1-docker.pkg.dev/$PROJECT_ID/recipe-images/recipe-frontend:$BUILD_ID
+      - --platform=managed
+      - --region=us-central1
+      - --allow-unauthenticated
+      - --port=80
+      - --service-account=1053892050255-compute@developer.gserviceaccount.com
+      - --min-instances=0
+      - --max-instances=1
+      - --quiet
+options:
+  logging: CLOUD_LOGGING_ONLY
