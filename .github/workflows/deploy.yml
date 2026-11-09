@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       deploy:
-        description: 'Deploy to Cloud Run after validation (requires GCP secrets)'
+        description: 'Deploy to Cloud Run after validation (uses Workload Identity Federation)'
         type: boolean
         default: true
 
@@ -56,21 +56,20 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && (github.event_name != 'workflow_dispatch' || inputs.deploy)
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
     env:
-      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+      GCP_PROJECT_ID: project-63de95f5-a7d6-4569-9a2
     steps:
       - name: Checkout tested commit
         uses: actions/checkout@v4
-      - name: Check deployment configuration
-        run: |
-          test -n "$GCP_PROJECT_ID" || { echo "::error::Add GCP_PROJECT_ID in repository Actions secrets."; exit 1; }
-          test -n "$GCP_SA_KEY" || { echo "::error::Add GCP_SA_KEY in repository Actions secrets."; exit 1; }
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          workload_identity_provider: projects/1053892050255/locations/global/workloadIdentityPools/github-actions/providers/github
+          service_account: recipe-build-deployer@project-63de95f5-a7d6-4569-9a2.iam.gserviceaccount.com
+          project_id: project-63de95f5-a7d6-4569-9a2
       - name: Set up Google Cloud CLI
         uses: google-github-actions/setup-gcloud@v2
       - name: Build and deploy backend using Cloud Build
