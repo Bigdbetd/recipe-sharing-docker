@@ -40,7 +40,7 @@ The workflow now uses GitHub OIDC with Google Workload Identity Federation. No J
 - Provider condition restricts authentication to that repository's main branch.
 - Only the deployment job receives `id-token: write`; validation has read-only repository permissions.
 
-[Run #6](https://github.com/Bigdbetd/recipe-sharing-docker/actions/runs/42551535205) verifies the new configuration. Its test/build job and authentication step passed; full deployment is still being verified.
+[Run #6](https://github.com/Bigdbetd/recipe-sharing-docker/actions/runs/42551535205) verifies the new configuration. Its test/build job, authentication step, and Cloud CLI setup passed. Source upload was blocked by access to the `project-63de95f5-a7d6-4569-9a2_cloudbuild` bucket. Deployment remains incomplete until this bucket permission is corrected.
 Cloud Build source storage, build execution, runtime service-account access, and log-reading permissions must also permit the deployment.
 
 Region is already us-central1 in the Cloud Build YAML; this workflow does not require a GCP_REGION secret.
