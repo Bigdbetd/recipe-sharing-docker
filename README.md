@@ -55,6 +55,21 @@ docker run --rm -p 3000:80 recipe-frontend
 
 Stop the individual containers before starting Compose so the ports are available.
 
-## Validation status
+## Unit 10: CI/CD pipeline
 
-Compose YAML and the modified database JavaScript passed syntax checks. Docker was unavailable in the editing environment, so image builds and runtime/persistence tests still need to be run on a Docker-enabled machine.
+GitHub Actions now tests, builds, and deploys this application automatically on main-branch pushes. Tests run on pull requests without deploying.
+
+- [Pipeline documentation](CI_PIPELINE.md)
+- [Screenshots: successful deployment and intentional test failure](evidence/README.md)
+- [361-word reflection](reflection.txt)
+- [Complete successful pipeline run](https://github.com/Bigdbetd/recipe-sharing-docker/actions/runs/42552370180)
+- [Intentional failing-test run](https://github.com/Bigdbetd/recipe-sharing-docker/actions/runs/42542845919)
+
+Validation passed: 9 backend tests, 10 frontend tests, production frontend build, both Docker builds, both Cloud Run deployments, and endpoint verification.
+
+Deployment uses GitHub OIDC with Workload Identity Federation; no JSON service account key is needed.
+
+Frontend: https://recipe-frontend-jdzyo544ya-uc.a.run.app
+Backend health: https://recipe-backend-jdzyo544ya-uc.a.run.app/api/health
+
+Cloud Run local SQLite storage is not durable across revisions; production persistence would require a managed database.
