@@ -52,7 +52,7 @@ describe('Recipe API Tests', () => {
       const response = await request(app)
         .post('/api/recipes')
         .send(newRecipe)
-        .expect(200);
+        .expect(201);
 
       expect(response.body).toHaveProperty('id');
       expect(response.body.name).toBe(newRecipe.name);
