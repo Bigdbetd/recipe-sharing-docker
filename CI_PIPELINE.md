@@ -28,7 +28,7 @@ Both Docker images also built successfully in GitHub Actions.
 1. [Initial validation](https://github.com/Bigdbetd/recipe-sharing-docker/actions/runs/42542815523): tests and both Docker image builds passed; deployment failed because GCP secrets were missing.
 2. [Intentional failing test](https://github.com/Bigdbetd/recipe-sharing-docker/actions/runs/42542845919): changed POST's expected status from 201 to 200. Backend tests failed; later stages and deployment were skipped.
 3. The incorrect expectation was restored in commit `4d9e4a8`.
-4. A manual validation-only run was requested with the deploy checkbox cleared. A validation-only success does not demonstrate a successful Cloud Run deployment.
+4. [Manual validation-only run #5](https://github.com/Bigdbetd/recipe-sharing-docker/actions/runs/42543034043) succeeded with the deploy checkbox cleared. A validation-only success does not demonstrate a successful Cloud Run deployment.
 
 ## Remaining deployment setup
 This repository currently has no GCP Actions secrets. Google Cloud Console was unavailable in the editing browser.
