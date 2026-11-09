@@ -30,15 +30,18 @@ Both Docker images also built successfully in GitHub Actions.
 3. The incorrect expectation was restored in commit `4d9e4a8`.
 4. [Manual validation-only run #5](https://github.com/Bigdbetd/recipe-sharing-docker/actions/runs/42543034043) succeeded with the deploy checkbox cleared. A validation-only success does not demonstrate a successful Cloud Run deployment.
 
-## Remaining deployment setup
-This repository currently has no GCP Actions secrets. Google Cloud Console was unavailable in the editing browser.
-1. Follow the course's GCP Deployment Authentication Setup resource to create a deployment service account with the required Cloud Build submission and service-account permissions.
-2. In GitHub, open Settings > Secrets and variables > Actions.
-3. Add `GCP_PROJECT_ID` containing the existing project ID.
-4. Add `GCP_SA_KEY` containing the service account JSON key. Enter it directly in GitHub Secrets; never commit it.
-5. Ensure the Cloud Build execution identity has permission to push to the existing `recipe-images` Artifact Registry repository and deploy the existing services using their existing runtime service account.
-6. Open Actions > Recipe App CI/CD Pipeline > Run workflow. Leave deployment checked and run main.
-7. Confirm both jobs and endpoint verification pass. Capture the complete successful deployment run screenshot before submitting.
+## Deployment authentication
+The workflow now uses GitHub OIDC with Google Workload Identity Federation. No JSON service account key or GCP Actions secret is required.
+
+- Project: `project-63de95f5-a7d6-4569-9a2`
+- Provider: `projects/1053892050255/locations/global/workloadIdentityPools/github-actions/providers/github`
+- Service account: `recipe-build-deployer@project-63de95f5-a7d6-4569-9a2.iam.gserviceaccount.com`
+- Repository attribute: `Bigdbetd/recipe-sharing-docker`
+- Provider condition restricts authentication to that repository's main branch.
+- Only the deployment job receives `id-token: write`; validation has read-only repository permissions.
+
+[Run #6](https://github.com/Bigdbetd/recipe-sharing-docker/actions/runs/42551535205) verifies the new configuration. Its test/build job and authentication step passed; full deployment is still being verified.
+Cloud Build source storage, build execution, runtime service-account access, and log-reading permissions must also permit the deployment.
 
 Region is already us-central1 in the Cloud Build YAML; this workflow does not require a GCP_REGION secret.
 Existing backend: https://recipe-backend-1053892050255.us-central1.run.app
