@@ -41,7 +41,8 @@ app.get('/api/recipes/:id', (req, res) => {
 app.post('/api/recipes', (req, res) => {
   const { name, ingredients, instructions, cookTime } = req.body;
   
-  if (!name || !ingredients || !instructions || !cookTime) {
+  if (![name, ingredients, instructions, cookTime].every(value =>
+    typeof value === 'string' && value.trim() !== '')) {
     res.status(400).json({ error: 'All fields are required' });
     return;
   }
@@ -81,7 +82,7 @@ app.delete('/api/recipes/:id', (req, res) => {
       res.status(404).json({ error: 'Recipe not found' });
       return;
     }
-    res.json({ message: 'Recipe deleted successfully' });
+    res.status(204).send();
   });
 });
 
@@ -94,7 +95,9 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+if (require.main === module) app.listen(PORT, '0.0.0.0', () => {
   console.log(`Recipe API server running on port ${PORT}`);
   console.log(`Health check: http://localhost:${PORT}/api/health`);
 });
+
+module.exports = app;

@@ -49,3 +49,6 @@ logs/
 # Temporary files
 *.tmp
 *.temp
+# Test reports and generated authentication files
+coverage/
+gha-creds-*.json
